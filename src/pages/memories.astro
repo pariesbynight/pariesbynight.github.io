@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { memories } from '../data/memories';
+---
+<BaseLayout title="Memories">
+  <section class="wrap archive-hero"><div class="eyebrow">The archive</div><h1>Little moments,<br /><em style="color: var(--pink); font-style: normal">kept close.</em></h1><p>A timeline of the photos, meetups and in-between moments that made Cutepids what it is.</p></section>
+  <section class="wrap memory-list">
+    {memories.map(([title, copy, image]) => <article class="memory"><div class="memory-copy"><div class="eyebrow">Memory</div><h2>{title}</h2><p>{copy}</p></div><img src={`/imgs/${image}`} alt={title} loading="lazy" /></article>)}
+  </section>
+</BaseLayout>
+<script>
+  const memoryCards = [...document.querySelectorAll<HTMLElement>('.memory')];
+  let frame = 0;
+  const focusMemory = () => {
+    frame = 0;
+    const viewportCenter = window.innerHeight / 2;
+    let closest: HTMLElement | undefined;
+    let closestDistance = Number.POSITIVE_INFINITY;
+    memoryCards.forEach((card) => {
+      const box = card.getBoundingClientRect();
+      const distance = Math.abs(box.top + box.height / 2 - viewportCenter);
+      if (distance < closestDistance) { closestDistance = distance; closest = card; }
+    });
+    memoryCards.forEach((card) => card.classList.toggle('is-focused', card === closest));
+  };
+  const requestFocus = () => { if (!frame) frame = window.requestAnimationFrame(focusMemory); };
+  window.addEventListener('scroll', requestFocus, { passive: true });
+  window.addEventListener('resize', requestFocus);
+  focusMemory();
+</script>

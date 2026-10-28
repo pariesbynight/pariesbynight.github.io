@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MemberCard from '../../components/MemberCard.astro';
+import { members } from '../../data/members';
+---
+<BaseLayout title="Members">
+  <section class="wrap archive-hero"><div class="eyebrow">The people</div><h1>Meet the <em style="color: var(--pink); font-style: normal">cutepids.</em></h1><p>Browse everyone in the archive and open a profile for their facts and photo roll.</p></section>
+  <section class="wrap members-grid" style="padding-bottom: 110px">{members.map((member, index) => <MemberCard member={member} index={index} />)}</section>
+</BaseLayout>

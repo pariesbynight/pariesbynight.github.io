@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { members } from '../../data/members';
+export function getStaticPaths() { return members.map((member) => ({ params: { slug: member.slug }, props: { member } })); }
+const { member } = Astro.props;
+---
+<BaseLayout title={member.name}>
+  <section class="wrap member-hero"><img src={`/imgs/${member.avatar}`} alt={member.name} /><div><div class="eyebrow">Cutepid profile</div><h1>{member.name}</h1><p class="nickname">{member.nickname} · born {member.birthDate}</p></div></section>
+  <section class="wrap"><div class="section-head"><div><div class="eyebrow">A few things</div><h2>Things we know.</h2></div></div><div class="facts">{member.facts.map((fact) => <div class="fact">{fact}</div>)}</div></section>
+  <section class="wrap photo-section">
+    <div class="section-head"><div><div class="eyebrow">The photo roll</div><h2>Unfiltered.</h2></div><p>Spin the memory wheel.</p></div>
+    <div class="photo-wheel" data-photo-wheel aria-label={`${member.name} photo wheel`}>
+      <div class="wheel-orbit">
+        <div class="wheel-track">
+          {member.photos.map((photo) => <img class="wheel-card" src={`/imgs/${photo}`} alt={`${member.name} memory`} loading="lazy" />)}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-photo-wheel]').forEach((wheel) => {
+    const track = wheel.querySelector<HTMLElement>('.wheel-track');
+    const cards = [...wheel.querySelectorAll<HTMLElement>('.wheel-card')];
+    if (!track || cards.length < 2) return;
+    let rotation = 0;
+    let lastFrame = 0;
+    const spinSpeed = 0.00054;
+
+    const render = () => {
+      const cardWidth = track.clientWidth;
+      const gap = Math.min(cardWidth * 0.68, 285);
+      cards.forEach((card, index) => {
+        let relative = ((index - rotation + cards.length / 2) % cards.length + cards.length) % cards.length - cards.length / 2;
+        if (relative > cards.length / 2 - 0.001) relative -= cards.length;
+        const distance = Math.abs(relative);
+        const curve = Math.min(distance, 2.2);
+        const z = Math.max(8, 72 - curve * 24);
+        const y = curve * curve * 7;
+        const scale = 0.92 - Math.min(curve, 2) * 0.015;
+        card.style.transform = `translateX(${relative * gap}px) translateY(${y}px) translateZ(${z}px) rotateY(${-relative * 17}deg) scale(${scale})`;
+        card.style.opacity = `${distance > 1.65 ? 0 : 0.9}`;
+        card.style.filter = 'saturate(.92) brightness(.9)';
+        card.style.zIndex = `${Math.round(100 - distance * 10)}`;
+      });
+    };
+    const tick = (time: number) => {
+      const elapsed = lastFrame ? Math.min(time - lastFrame, 40) : 16;
+      lastFrame = time;
+      rotation += spinSpeed * elapsed;
+      render();
+      requestAnimationFrame(tick);
+    };
+    render();
+    requestAnimationFrame(tick);
+  });
+</script>

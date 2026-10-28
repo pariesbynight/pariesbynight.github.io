@@ -1,0 +1,170 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MemberCard from '../components/MemberCard.astro';
+import { members } from '../data/members';
+---
+<BaseLayout title="Our little archive">
+  <section id="mobile-gate" class="mobile-gate" aria-label="Enter Cutepids game">
+    <button id="mobile-gate-button" class="mobile-gate-button" type="button">
+      <span class="mobile-bow" aria-hidden="true">🏹</span>
+      <span>Enter the game</span>
+      <small>tap to unlock</small>
+    </button>
+  </section>
+  <div id="mobile-content" class="mobile-content">
+  <section class="wrap hero">
+    <div>
+      <div class="eyebrow">Est. 2019 · a little memory space</div>
+      <h1>Some people make a place feel like <em>home.</em></h1>
+      <p class="hero-copy">Một góc nhỏ để lưu lại những người, những câu chuyện và những khoảnh khắc rất riêng của chúng mình.</p>
+      <div class="hero-actions"><a class="button" href="#members">Explore the archive ↗</a><a class="button secondary" href="/memories">View memories</a></div>
+    </div>
+    <div class="hero-art" aria-label="Cutepids memories">
+      <img class="main-photo" src="/imgs/total.jpg" alt="Cutepids group" />
+      <img class="small-photo" src="/imgs/cp3.jpg" alt="A Cutepids memory" />
+    </div>
+  </section>
+  <section id="members" class="wrap" style="padding-bottom: 40px">
+    <div class="section-head"><div><div class="eyebrow">The people</div><h2>Meet the cutepids.</h2></div><p>Eleven personalities, one very noisy little corner of the world.</p></div>
+    <div class="members-grid">{members.map((member, index) => <MemberCard member={member} index={index} />)}</div>
+  </section>
+  <section id="unlock-game" class="wrap unlock" aria-label="Unlock archive">
+    <div class="eyebrow">Private little door</div>
+    <h2 style="margin-top: 10px">Unlock the archive</h2>
+    <div class="unlock-progress" aria-label="Unlock progress"><span data-step-dot="0" class="is-current"></span><span data-step-dot="1"></span><span data-step-dot="2"></span></div>
+    <form id="unlock-form" class="unlock-row">
+      <input id="unlock-input" type="password" placeholder="Password 1 of 3" aria-label="Password" autocomplete="off" />
+      <button class="button" type="submit">Enter</button>
+    </form>
+    <p id="unlock-hint" class="unlock-hint">Gợi ý: 8 kí tự</p>
+    <p id="unlock-message" class="unlock-message" aria-live="polite"></p>
+  </section>
+  <section id="unlock-reveal" class="unlock-reveal" hidden aria-live="polite">
+    <div class="reveal-topline"><span class="eyebrow">Archive unlocked</span><span>01 — 05</span></div>
+    <div class="reveal-stage">
+      <div class="reveal-orbit">
+        <div class="reveal-core">
+          <span class="reveal-core-label">Cutepids</span>
+          <img src="/imgs/total.jpg" alt="Cutepids group portrait" />
+        </div>
+        <div class="reveal-members" aria-hidden="true">
+          {members.map((member, index) => <div class="reveal-member" data-reveal-member data-index={index}><img src={`/imgs/${member.avatar}`} alt="" /></div>)}
+        </div>
+      </div>
+    </div>
+    <div class="reveal-memories">
+      <div><p class="eyebrow">Then and now</p><h3>A few frames<br />from the archive.</h3></div>
+      <div class="reveal-frame-stack">
+        {['final1.jpg', 'final2.jpg', 'cp3.jpg', 'cp5.jpg', 'cp6.jpg'].map((image, index) => <img class:list={{ 'is-active': index === 0 }} data-reveal-frame src={`/imgs/${image}`} alt="Cutepids memory" />)}
+      </div>
+    </div>
+  </section>
+  </div>
+</BaseLayout>
+<script>
+  const mobileGate = document.querySelector<HTMLElement>('#mobile-gate');
+  const mobileContent = document.querySelector<HTMLElement>('#mobile-content');
+  const mobileGateButton = document.querySelector<HTMLButtonElement>('#mobile-gate-button');
+  const form = document.querySelector<HTMLFormElement>('#unlock-form');
+  const input = document.querySelector<HTMLInputElement>('#unlock-input');
+  const hint = document.querySelector<HTMLParagraphElement>('#unlock-hint');
+  const message = document.querySelector<HTMLParagraphElement>('#unlock-message');
+  const dots = [...document.querySelectorAll<HTMLElement>('[data-step-dot]')];
+  const passwords = ['Cutepids', '05092019', '12A3'];
+  const hints = ['8 kí tự', '8 số', '3 số 1 ký tự'];
+  const reveal = document.querySelector<HTMLElement>('#unlock-reveal');
+  const revealOrbit = document.querySelector<HTMLElement>('.reveal-orbit');
+  const revealMembers = [...document.querySelectorAll<HTMLElement>('[data-reveal-member]')];
+  const revealFrames = [...document.querySelectorAll<HTMLElement>('[data-reveal-frame]')];
+  let level = 0;
+
+  mobileGateButton?.addEventListener('click', () => {
+    document.body.classList.add('mobile-entered');
+    mobileGate?.setAttribute('aria-hidden', 'true');
+    mobileContent?.removeAttribute('aria-hidden');
+    window.setTimeout(() => document.querySelector('#unlock-game')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+  });
+
+  const updateStep = () => {
+    if (input) input.placeholder = `Password ${level + 1} of 3`;
+    if (hint) hint.textContent = `Gợi ý: ${hints[level] ?? 'Đã mở khóa ♥'}`;
+    dots.forEach((dot, index) => dot.classList.toggle('is-current', index === level));
+  };
+
+  const startReveal = () => {
+    if (!reveal) return;
+    reveal.hidden = false;
+    reveal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    let phase = 0;
+    const baseRadius = () => Math.min(revealOrbit?.clientWidth ?? 560, 560) * 0.39;
+    const placeMembers = (radius: number, rotation: number, scale: number) => {
+      revealMembers.forEach((member, index) => {
+        const angle = -90 + rotation + (index * 360) / revealMembers.length;
+        member.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px) rotate(${-angle}deg)`;
+        member.style.transform += ` scale(${scale})`;
+      });
+    };
+    placeMembers(baseRadius(), phase, .2);
+    revealMembers.forEach((member, index) => {
+      window.setTimeout(() => {
+        member.classList.add('is-visible');
+        const angle = -90 + phase + (index * 360) / revealMembers.length;
+        member.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(-${baseRadius()}px) rotate(${-angle}deg) scale(1)`;
+      }, index * 420 + 250);
+    });
+    const allVisibleAt = revealMembers.length * 420 + 850;
+    window.setTimeout(() => {
+      reveal.classList.add('is-spinning');
+      const start = performance.now();
+      const startPhase = phase;
+      const spin = (now: number) => {
+        const progress = Math.min((now - start) / 3200, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        phase = startPhase + eased * 1080;
+        placeMembers(baseRadius() * (1 - eased * .62), phase, 1);
+        if (progress < 1) window.requestAnimationFrame(spin);
+        else {
+          reveal.classList.add('is-complete');
+          let last = performance.now();
+          const finalSpin = (time: number) => {
+            phase += (time - last) * .018;
+            last = time;
+            placeMembers(baseRadius() * 1.2, phase, 1);
+            window.requestAnimationFrame(finalSpin);
+          };
+          window.requestAnimationFrame(finalSpin);
+        }
+      };
+      window.requestAnimationFrame(spin);
+    }, allVisibleAt);
+    let frame = 0;
+    window.setInterval(() => {
+      if (!reveal.classList.contains('is-complete')) return;
+      revealFrames[frame]?.classList.remove('is-active');
+      frame = (frame + 1) % revealFrames.length;
+      revealFrames[frame]?.classList.add('is-active');
+    }, 2400);
+  };
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const answer = input?.value ?? '';
+    if (answer !== passwords[level]) {
+      if (message) message.textContent = 'Sai mật mã — thử lại bước này nhé.';
+      if (input) { input.select(); }
+      return;
+    }
+    level += 1;
+    if (input) input.value = '';
+    if (level === passwords.length) {
+      if (message) message.textContent = 'Đã mở khóa đủ 3 lớp. Welcome back, cutepid ♥';
+      if (hint) hint.textContent = 'Archive unlocked';
+      dots.forEach((dot) => dot.classList.add('is-done'));
+      startReveal();
+      return;
+    }
+    if (message) message.textContent = `Đúng rồi — đến lớp ${level + 1}/3.`;
+    updateStep();
+  });
+  updateStep();
+</script>

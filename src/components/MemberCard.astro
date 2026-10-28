@@ -1,0 +1,10 @@
+---
+import type { Member } from '../data/members';
+const { member, index } = Astro.props as { member: Member; index: number };
+---
+<a class="member-card" href={`/members/${member.slug}`}>
+  <span class="number">{String(index + 1).padStart(2, '0')}</span>
+  <img src={`/imgs/${member.avatar}`} alt={member.name} loading="lazy" />
+  <h3>{member.name}</h3>
+  <p>{member.nickname}</p>
+</a>

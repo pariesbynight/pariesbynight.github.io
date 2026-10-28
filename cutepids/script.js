@@ -11,7 +11,7 @@ let countPlay = 0;
 let stt;
 let needHint = 0;
 
-AOS.init();
+if (typeof AOS !== "undefined") AOS.init({ once: true, duration: 700 });
 
 function start() {
 	level = 0;
@@ -24,7 +24,7 @@ function getLevel(level, repeated) {
 		stt = document.getElementById("status");
 		stt.innerText = "Mật khẩu sai, hãy nhập lại";
 	}
-	hint = document.getElementById("hint");
+	const hint = document.getElementById("hint");
 	hint.innerText = hints[level];
 }
 

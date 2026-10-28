@@ -1,0 +1,35 @@
+---
+import '../styles/global.css';
+import { members } from '../data/members';
+const { title = 'Cutepids' } = Astro.props;
+const path = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#0c080d" />
+    <title>{title} · Cutepids</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="Main navigation">
+        <a class="brand" href="/">cute<span>pids</span></a>
+        <ul class="nav-links">
+          <li><a class={path === '/' ? 'active' : ''} href="/">Home</a></li>
+          <li class="nav-dropdown">
+            <a class={path.startsWith('/members') ? 'active' : ''} href="/members/">Members <span aria-hidden="true">⌄</span></a>
+            <div class="nav-dropdown-menu">
+              <a class="nav-dropdown-all" href="/members/">All members ↗</a>
+              {members.map((member) => <a href={`/members/${member.slug}`}>{member.name}</a>)}
+            </div>
+          </li>
+          <li><a class={path === '/memories' ? 'active' : ''} href="/memories">Memories</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main class="page"><slot /></main>
+    <footer>Made with memories, late nights and a little bit of pink.</footer>
+  </body>
+</html>
