@@ -4,14 +4,6 @@ import MemberCard from '../components/MemberCard.astro';
 import { members } from '../data/members';
 ---
 <BaseLayout title="Our little archive">
-  <section id="mobile-gate" class="mobile-gate" aria-label="Enter Cutepids game">
-    <button id="mobile-gate-button" class="mobile-gate-button" type="button">
-      <span class="mobile-bow" aria-hidden="true">🏹</span>
-      <span>Enter the game</span>
-      <small>tap to unlock</small>
-    </button>
-  </section>
-  <div id="mobile-content" class="mobile-content">
   <section class="wrap hero">
     <div>
       <div class="eyebrow">Est. 2019 · a little memory space</div>
@@ -59,12 +51,8 @@ import { members } from '../data/members';
       </div>
     </div>
   </section>
-  </div>
 </BaseLayout>
 <script>
-  const mobileGate = document.querySelector<HTMLElement>('#mobile-gate');
-  const mobileContent = document.querySelector<HTMLElement>('#mobile-content');
-  const mobileGateButton = document.querySelector<HTMLButtonElement>('#mobile-gate-button');
   const form = document.querySelector<HTMLFormElement>('#unlock-form');
   const input = document.querySelector<HTMLInputElement>('#unlock-input');
   const hint = document.querySelector<HTMLParagraphElement>('#unlock-hint');
@@ -77,13 +65,6 @@ import { members } from '../data/members';
   const revealMembers = [...document.querySelectorAll<HTMLElement>('[data-reveal-member]')];
   const revealFrames = [...document.querySelectorAll<HTMLElement>('[data-reveal-frame]')];
   let level = 0;
-
-  mobileGateButton?.addEventListener('click', () => {
-    document.body.classList.add('mobile-entered');
-    mobileGate?.setAttribute('aria-hidden', 'true');
-    mobileContent?.removeAttribute('aria-hidden');
-    window.setTimeout(() => document.querySelector('#unlock-game')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
-  });
 
   const updateStep = () => {
     if (input) input.placeholder = `Password ${level + 1} of 3`;
